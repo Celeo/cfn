@@ -22,20 +22,21 @@ struct Data {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut sim = SimConnect::open("LOG", |sim, recv| match recv {
+    let mut sim = SimConnect::open("CFN", |sim, recv| match recv {
         SimConnectRecv::SimObjectData(event) => match event.dwRequestID {
             0 => {
                 println!("{:?}", event.into::<Data>(sim).unwrap());
             }
             _ => {}
         },
-        _ => println!("{:?}", recv),
+        _ => {}
     })?;
 
     sim.request_data_on_sim_object::<Data>(0, SIMCONNECT_OBJECT_ID_USER, Period::SimFrame)?;
 
     loop {
         sim.call_dispatch()?;
+        println!("");
         std::thread::sleep(std::time::Duration::from_millis(1000));
     }
 }
